@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>components/Player.qml</file>
+        <file>components/Obstacle.qml</file>
+        <file>components/ObstaclePair.qml</file>
+        <file>images/mario.png</file>
+    </qresource>
+</RCC>
