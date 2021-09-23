@@ -2,8 +2,9 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>components/Player.qml</file>
+        <file>components/Boundarybox.qml</file>
         <file>components/Obstacle.qml</file>
         <file>components/ObstaclePair.qml</file>
-        <file>images/mario.png</file>
+        <file>images/frame-1.png</file>
     </qresource>
 </RCC>

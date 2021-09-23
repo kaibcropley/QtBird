@@ -20,15 +20,23 @@ Item {
     property color obstacleColor: canHitPlayer ? "red" : "brown"
 
     signal setPlayerMaximums(int newMinY, int newMaxY)
+    signal playerHasCleared
+
+    Component.onCompleted: {
+        rootWindow.resetGame.connect(obstaclePair.destroy);
+    }
 
     onCanHitPlayerChanged: {
         if (canHitPlayer) {
             setPlayerMaximums(topHeight, obstaclePair.height - botHeight);
+        } else {
+            setPlayerMaximums(0, obstaclePair.height);
+            playerHasCleared();
         }
     }
 
 
-    Component.onCompleted: {
+    function startMovement() {
         moveAcrossScreen.start();
     }
 
@@ -36,7 +44,6 @@ Item {
         id: moveAcrossScreen
         target: obstaclePair
         property: "x"
-        from: rootWindow.width + target.width
         to: 0 - obstaclePair.width
         duration: 5000
 

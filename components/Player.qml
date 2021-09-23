@@ -1,67 +1,76 @@
 import QtQuick 2.5
 
-Image {
+Item {
     id: player
-    width: 50
-    height: 50
-    focus: true
 
-    source: "images/mario.png"
+    property alias sourceImage: playerImage.source
 
-    property int jumpHeight: 75
-    property int jumpDuration: 750
+    property int jumpHeight
+    property int jumpDuration
 
-    property int startPositionX: rootWindow.width / 2
-    property int startPositionY: rootWindow.height / 2
     property int fallTargetY
+    property int startPositionX
+    property int startPositionY
 
     property int hittableXMin: x
     property int hittableXMax: x + player.width
 
-    property int minY: 0
-    property int maxY: 5000 // Start at an unreasonably high number so we don't hit it on start
+    property bool enableJump: true
+    property alias enableBoundaries: bodyBoundaryBox.enableBoundaries
 
-    signal setMaxY(int newMinY, int newMaxY);
+    signal setBoundaries(int newMinY, int newMaxY)
+    signal jump()
 
-    onSetMaxY: {
-        console.log("onSetMaxY(", newMinY, newMaxY, ")");
-        minY = newMinY;
-        maxY = newMaxY;
-    }
-
-    Rectangle {
-        id: playerHitBox
-        color: "red"
-        opacity: 25
-        z: player.z - 1
-        y: player.y
-        x: player.x
-        height: parent.height * .66
-        width: parent.width * .66
-
-        onYChanged: {
-            if (y <= player.minY || y >= player.maxY) {
-                player.goToStartPos();
-            }
-        }
+    onSetBoundaries: {
+        bodyBoundaryBox.setBoundaries(newMinY, newMaxY);
     }
 
     Component.onCompleted: {
-        goToStartPos();
-        console.log("player.hittableXMin:", player.hittableXMin);
-        console.log("player.hittableXMax:", player.hittableXMax);
+        reset();
     }
 
-    function goToStartPos() {
-        console.log("Restarting player pos");
+    function reset() {
+        console.log("Resetting player");
+        playerRotationAnimation.stop();
+        jumpAnimation.stop();
+
+        bodyBoundaryBox.setBoundaries(0, fallTargetY);
+
         x = startPositionX;
         y = startPositionY;
+        rotation = 0;
     }
 
     Keys.onSpacePressed: {
-        console.log("Space pressed");
-        jumpAnimation.restart();
+        jump();
     }
+
+    onJump: {
+        if (enableJump) {
+            jumpAnimation.restart();
+            playerRotationAnimation.restart();
+        }
+    }
+
+    Image {
+        id: playerImage
+        anchors.fill: parent
+    }
+
+    Boundarybox {
+        id: bodyBoundaryBox
+        userY: player.y
+
+        height: player.height * .70
+        width: player.width * .60
+        x: 20
+        y: 15
+
+        onHitBoundary: {
+            rootWindow.resetGame();
+        }
+    }
+
 
     SequentialAnimation {
         id: jumpAnimation
@@ -80,8 +89,30 @@ Image {
             target: player;
             property: "y";
             to: fallTargetY
-            duration: (fallTargetY - target.y) + 250 // 2000
+            duration: (fallTargetY - target.y) + 250
             easing.type: Easing.InCubic
+        }
+    }
+
+    SequentialAnimation {
+        id: playerRotationAnimation
+
+        PropertyAnimation {
+            id: playerJumpRotationAnimation
+            target: player
+            property: "rotation"
+            from: -75
+            to: 0
+            duration: player.jumpDuration
+        }
+
+        PropertyAnimation {
+            id: playerFallRotationAnimation
+            target: player
+            property: "rotation"
+            from: 0
+            to: 90
+            duration: 1500
         }
     }
 }
