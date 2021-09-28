@@ -17,7 +17,7 @@ Item {
     property int hittableXMax
 
     property bool canHitPlayer: (x + width) >= hittableXMin && x <= hittableXMax
-    property color obstacleColor: canHitPlayer ? "red" : "brown"
+    property color obstacleColor: "lightgreen" // canHitPlayer ? "red" : "brown"
 
     signal setPlayerMaximums(int newMinY, int newMaxY)
     signal playerHasCleared

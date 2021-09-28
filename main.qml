@@ -7,7 +7,7 @@ Window {
     visible: true
     width: 1000
     height: 1000
-    title: qsTr("Hello World")
+    title: qsTr("Qt Bird")
 
     property bool gameRunning: false
     property int score: 0
@@ -17,7 +17,6 @@ Window {
     Component.onCompleted: {
         console.log("Initializing game");
         resetGame();
-        player.enableBoundaries = true;
     }
 
     Rectangle {
@@ -102,8 +101,6 @@ Window {
         triggeredOnStart: true
 
         onTriggered: {
-            // TODO have smarter way of generating obstacle heights
-//            createObstacle(300 + getRandomInt(-150, 150), 300 + getRandomInt(-150, 150));
             generateObstacle();
         }
     }
@@ -123,7 +120,7 @@ Window {
         startPositionY: (rootWindow.height / 2) - (player.height / 2)
         fallTargetY: rootWindow.height
 
-        enableBoundaries: false
+        enableBoundaries: gameRunning
 
         onJump: {
             gameRunning = true;
@@ -165,14 +162,10 @@ Window {
         Text {
             id: pointTxt
             anchors.centerIn: parent
-//            horizontalAlignment: Text.AlignHCenter
-//            verticalAlignment: Text.AlignVCenter
             font.family: "chilanka"
             font.pointSize: 30
 
             text: score
         }
     }
-
-
 }
