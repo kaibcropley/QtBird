@@ -2,6 +2,8 @@ import QtQuick 2.5
 import QtQuick.Window 2.2
 import "qrc:/components/"
 
+// Window, main
+
 Window {
     id: rootWindow
     visible: true
@@ -9,8 +11,12 @@ Window {
     height: 1000
     title: qsTr("Qt Bird")
 
+    // Game properties
     property bool gameRunning: false
     property int score: 0
+
+    // Configs
+    property int obstacleSpawnSpeed: 1750 // Note in ms
 
     signal resetGame()
 
@@ -20,6 +26,7 @@ Window {
     }
 
     Rectangle {
+        id: background
         anchors.fill: parent
         color: "lightblue"
     }
@@ -41,62 +48,9 @@ Window {
         score = 0;
     }
 
-    function generateObstacle() {
-        var maxHeight = rootWindow.height;
-
-        var openingSize = getRandomInt(200, 500);
-        var obstacleHeight = getRandomInt(50, (maxHeight / 2) - openingSize);
-
-        if (Math.round(getRandomInt(1, 2)) === 1) {
-            createObstacle(obstacleHeight, obstacleHeight + openingSize);
-        } else {
-            createObstacle(obstacleHeight + openingSize, obstacleHeight);
-        }
-    }
-
-    function createObstacle(topHeight, botHeight, obstacleWidth, startX) {
-        if (obstacleWidth === undefined || obstacleWidth === null) {
-            obstacleWidth = 100;
-        }
-
-        if (startX === undefined || startX === null) {
-            startX = rootWindow.width + obstacleWidth;
-        }
-
-        var component = Qt.createComponent("qrc:/components/ObstaclePair.qml");
-        var obstacle = component.createObject(rootWindow, {
-                                                  "x": startX,
-                                                  "topHeight": topHeight,
-                                                  "botHeight": botHeight,
-                                                  "hittableXMin": player.hittableXMin,
-                                                  "hittableXMax": player.hittableXMax
-                                              });
-        obstacle.setPlayerMaximums.connect(player.setBoundaries);
-        obstacle.playerHasCleared.connect(increaseScore);
-        obstacle.startMovement();
-
-        if (obstacle === null) {
-            // Error Handling
-            console.log("createObstacle(", topHeight, botHeight, "):", "Error creating obstacle");
-        }
-    }
-
-    function getRandomArbitrary(min, max) {
-        return Math.random() * (max - min) + min;
-    }
-    function getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function increaseScore() {
-        score++;
-    }
-
     Timer {
         id: obstacleTimer
-        interval: 1750
+        interval: obstacleSpawnSpeed
         repeat: gameRunning
         triggeredOnStart: true
 
@@ -154,10 +108,10 @@ Window {
         z: parent.z + 1
         height: 50
         width: 50
-        color: Qt.darker("lightblue", 1.1)
         radius: 10
 
         border.width: 4
+        color: Qt.darker("lightblue", 1.1)
 
         Text {
             id: pointTxt
@@ -167,5 +121,58 @@ Window {
 
             text: score
         }
+    }
+
+    function generateObstacle() {
+        var maxHeight = rootWindow.height;
+
+        var openingSize = getRandomInt(200, 500);
+        var obstacleHeight = getRandomInt(50, (maxHeight / 2) - openingSize);
+
+        if (Math.round(getRandomInt(1, 2)) === 1) {
+            createObstacle(obstacleHeight, obstacleHeight + openingSize);
+        } else {
+            createObstacle(obstacleHeight + openingSize, obstacleHeight);
+        }
+    }
+
+    function createObstacle(topHeight, botHeight, obstacleWidth, startX) {
+        if (obstacleWidth === undefined || obstacleWidth === null) {
+            obstacleWidth = 100;
+        }
+
+        if (startX === undefined || startX === null) {
+            startX = rootWindow.width + obstacleWidth;
+        }
+
+        var component = Qt.createComponent("qrc:/components/ObstaclePair.qml");
+        var obstacle = component.createObject(rootWindow, {
+                                                  "x": startX,
+                                                  "topHeight": topHeight,
+                                                  "botHeight": botHeight,
+                                                  "hittableXMin": player.hittableXMin,
+                                                  "hittableXMax": player.hittableXMax
+                                              });
+        obstacle.setPlayerMaximums.connect(player.setBoundaries);
+        obstacle.playerHasCleared.connect(increaseScore);
+        obstacle.startMovement();
+
+        if (obstacle === null) {
+            // Error Handling
+            console.log("createObstacle(", topHeight, botHeight, "):", "Error creating obstacle");
+        }
+    }
+
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function increaseScore() {
+        score++;
     }
 }
